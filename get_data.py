@@ -1,17 +1,50 @@
-import analysis 
 import numpy as np
 import pandas as pd
+import csv
 
+CAR_POSITIONS_2023 = ['27','44','70','66','12','93','78','1','16','023','77','19','57','80','32','91','96','83','21','42','92','75','47']
 
-class Features:
-    def __init__(self, data, all_cars):
-        self.data = data
-        self.X = []
-        self.Y = []
+CAR_POSITIONS_2022 = ["16", "44", "32", "21", "70", "57", "64", "71",
+                      "27", "99", "19", "98", "66", "47", "12", "42",
+                      "39", "96", "59", "28", "75", "34"]
+
+class Dataset:
+    def __init__(self, path, all_cars):
+        _, self.data = self.read_data(path)
         self.all_cars = all_cars[:10]
         self.filterGTDdata()
-        self.helper()
+        self.fixSessionTimes()
+        self.sessionTimeToSeconds()
         # make data for all GTD cars first then use only top 10 to train the model.
+
+
+    def fixSessionTimes(self):
+        hour = 0
+        self.data[0][5] = '0:' + self.data[0][5]
+        data_copy = self.data
+        for i in range(1, len(self.data)):
+            try:
+                if int(self.data[i-1][5].split(':')[1]) > int(self.data[i][5].split(':')[0]):
+                    hour += 1
+                self.data[i][5] = str(hour)+':'+self.data[i][5]
+            except:
+                print(i)
+
+
+    def read_data(self, path):
+        """
+        Read the CSV file and return the header (column names) and the data
+        Path: ./CSV and Replay/WeatherTech Championship Daytona Race.csv"""
+        try:
+            file = open(path)
+            reader = csv.reader(file)
+            header = next(reader)
+            data = []
+            for row in reader:
+                data.append(row)
+            return header, data
+        except(FileNotFoundError):
+            print("Wrong file path or the file is missing")
 
 
     def filterGTDdata(self):
@@ -156,7 +189,7 @@ class Features:
         return remaining_stops        
 
 
-    def helper(self):
+    def sessionTimeToSeconds(self):
         for d in self.data:
             hours, mins, secs = d[5].split(':')
             seconds = int(hours)*60*60 + int(mins)*60 + float(secs)
@@ -176,7 +209,6 @@ class Features:
 
 
 if __name__ == "__main__":
-    ra = analysis.RaceAnalysis()
-    features = Features(ra.data, ra.gtd_positions)
-    print(features.makeData())
+    dt = Dataset("./data/Daytona_24hrs_GTD_replay(2022).csv", CAR_POSITIONS_2022)
+    print(dt.makeData())
 

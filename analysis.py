@@ -7,7 +7,7 @@ import numpy as np
 # Top 17 cars in gtd actually finished the race at the end of 24 hrs.
 
 class RaceAnalysis:
-    def __init__(self, path="./Daytona_24hrs_GTD_replay.csv"):
+    def __init__(self, path="./Daytona_24hrs_GTD_replay.csv(2023)"):
         self.path = path 
         self.header, self.data = self.read_data(path)
         self.fixSessionTimes()
